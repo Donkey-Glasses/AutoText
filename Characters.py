@@ -1,9 +1,3 @@
-from Items import Weapon, Armor
-
-from typing import Optional
-from json import dump, load
-
-
 class AttributeMods:
     def __init__(self, strength: int, agility: int, constitution: int, intelligence: int, wits: int, willpower: int):
         self.strength = strength
@@ -14,12 +8,15 @@ class AttributeMods:
         self.willpower = willpower
 
     def apply(self, combatant):
-        combatant.strength += self.strength
-        combatant.agility += self.agility
-        combatant.constitution += self.constitution
-        combatant.intelligence += self.intelligence
-        combatant.wits += self.wits
-        combatant.willpower += self.willpower
+        def plus_equal_with_min(c_stat, a_stat, minim: int = 3):
+            return max(c_stat + a_stat, minim)
+
+        plus_equal_with_min(combatant.strength, self.strength)
+        plus_equal_with_min(combatant.agility, self.agility)
+        plus_equal_with_min(combatant.constitution, self.constitution)
+        plus_equal_with_min(combatant.intelligence, self.intelligence)
+        plus_equal_with_min(combatant.wits, self.wits)
+        plus_equal_with_min(combatant.willpower, self.willpower)
 
     @classmethod
     def int_list(cls, int_list: list):
@@ -30,6 +27,10 @@ class AttributeMods:
         wits = int_list[4]
         will = int_list[5]
         return AttributeMods(stre, agil, cons, inte, wits, will)
+
+    @classmethod
+    def mob_mods(cls):
+        return AttributeMods(-3, -3, -3, -3, -3, -3)
 
 
 class Species:
@@ -57,6 +58,11 @@ class Species:
     def dwarf(cls):
         return Species('dwarf', 'dwarvus', 'dwarven', 'dwarves', 'dung', 'dungs',
                        AttributeMods.int_list([2, 0, 2, 0, 0, 0]))
+
+    @classmethod
+    def goblin(cls):
+        return Species('goblin', 'gobican', 'goblin', 'goblins', 'gib', 'gibs',
+                       AttributeMods.int_list([0, 2, 0, 0, 0, 0]))
 
 
 class Gender:
@@ -93,6 +99,10 @@ class Profession:
     @classmethod
     def warrior(cls):
         return Profession('warrior', 'warriors', AttributeMods.int_list([2, 0, 2, 0, 0, 0]))
+
+    @classmethod
+    def mob_warrior(cls):
+        return Profession('warrior', 'warriors', AttributeMods.int_list([0, 0, 0, -4, -2, -2]))
 
 
 class Character:
