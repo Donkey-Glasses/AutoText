@@ -1,3 +1,7 @@
+import Locations
+import main
+
+
 class AttributeMods:
     def __init__(self, strength: int, agility: int, constitution: int, intelligence: int, wits: int, willpower: int):
         self.strength = strength
@@ -122,15 +126,26 @@ class Combatant(Character):
         self.intelligence = 10
         self.wits = 10
         self.willpower = 10
+        self.hp_per_level = 5
         self.skills = []
         self.level = level
         self.profession.mods.apply(self)
         self.species.mods.apply(self)
+        self.missing_hp = 0
+
+    @property
+    def max_hp(self):
+        return self.level * (self.constitution + self.hp_per_level) + 30
+
+    @property
+    def current_hp(self):
+        return self.max_hp - self.missing_hp
 
 
-class Player(Combatant):
-    def __init__(self, name, gender, species, profession, level):
+class Hero(Combatant):
+    def __init__(self, name, gender, species, profession, level, location: Locations.Location = Locations.start):
         super().__init__(name, gender, species, profession, level)
+        self.location = location
 
 
 class Monster(Combatant):
@@ -138,4 +153,7 @@ class Monster(Combatant):
 
 
 class NonPlayer(Character):
-    raise NotImplementedError
+    def __init__(self, name: str, gender: Gender, species: Species, option_list: main.OptionList, description: str):
+        super().__init__(name, gender, species)
+        self.option_list = option_list
+        self.description = description
