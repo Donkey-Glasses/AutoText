@@ -49,24 +49,10 @@ class Species:
         self.mods = mods
 
     @classmethod
-    def human(cls):
-        return Species('human', 'homonus', 'human', 'humans', 'jack', 'jacks',
-                       AttributeMods.int_list([1, 1, 1, 1, 1, 1]))
-
-    @classmethod
-    def elf(cls):
-        return Species('elf', 'elvynus', 'elven', 'elves', 'ear', 'ears',
-                       AttributeMods.int_list([0, 2, 0, 2, 0, 0]))
-
-    @classmethod
-    def dwarf(cls):
-        return Species('dwarf', 'dwarvus', 'dwarven', 'dwarves', 'dung', 'dungs',
-                       AttributeMods.int_list([2, 0, 2, 0, 0, 0]))
-
-    @classmethod
-    def goblin(cls):
-        return Species('goblin', 'gobican', 'goblin', 'goblins', 'gib', 'gibs',
-                       AttributeMods.int_list([0, 2, 0, 0, 0, 0]))
+    def from_json(cls, json_dict):
+        mods = AttributeMods.int_list(['mods'])
+        return Species(json_dict['species'], json_dict['scientific'], json_dict['adjective'], json_dict['plural'],
+                       json_dict['epithet'], json_dict['epithet_plural'], mods)
 
 
 class Gender:
@@ -78,20 +64,9 @@ class Gender:
         self.objective = objective
 
     @classmethod
-    def non_binary(cls):
-        return Gender('non-binary', 'non-binary', 'enby', 'they', 'them')
-
-    @classmethod
-    def female(cls):
-        return Gender('female', 'woman', 'girl', 'she', 'her')
-
-    @classmethod
-    def male(cls):
-        return Gender('male', 'man', 'boy', 'he', 'him')
-
-    @classmethod
-    def object(cls):
-        return Gender('object', 'object', 'object', 'it', 'it')
+    def from_json(cls, json_dict):
+        return Gender(json_dict['scientific'], json_dict['adult'], json_dict['diminutive'],
+                      json_dict['subjective'], json_dict['objective'])
 
 
 class Profession:
@@ -114,6 +89,16 @@ class Character:
         self.name = name
         self.gender = gender
         self.species = species
+
+    def __repr__(self):
+        return f'<<{self.__class__.__name__}>> <{id(self)}> Name: {self.name} Species: {self.species}'
+
+
+class NonPlayer(Character):
+    def __init__(self, name: str, gender: Gender, species: Species, option_list: main.OptionList, description: str):
+        super().__init__(name, gender, species)
+        self.option_list = option_list
+        self.description = description
 
 
 class Combatant(Character):
@@ -149,11 +134,6 @@ class Hero(Combatant):
 
 
 class Monster(Combatant):
-    raise NotImplementedError
-
-
-class NonPlayer(Character):
-    def __init__(self, name: str, gender: Gender, species: Species, option_list: main.OptionList, description: str):
-        super().__init__(name, gender, species)
-        self.option_list = option_list
-        self.description = description
+    def __init__(self, name, gender, species, profession, level):
+        super().__init__(name, gender, species, profession, level)
+        AttributeMods.mob_mods().apply(self)
