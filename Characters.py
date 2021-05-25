@@ -1,5 +1,5 @@
 import Locations
-import main
+import helpers
 
 
 class AttributeMods:
@@ -15,12 +15,12 @@ class AttributeMods:
         def plus_equal_with_min(c_stat, a_stat, minim: int = 3):
             return max(c_stat + a_stat, minim)
 
-        plus_equal_with_min(combatant.strength, self.strength)
-        plus_equal_with_min(combatant.agility, self.agility)
-        plus_equal_with_min(combatant.constitution, self.constitution)
-        plus_equal_with_min(combatant.intelligence, self.intelligence)
-        plus_equal_with_min(combatant.wits, self.wits)
-        plus_equal_with_min(combatant.willpower, self.willpower)
+        combatant.strength = plus_equal_with_min(combatant.strength, self.strength)
+        combatant.agility = plus_equal_with_min(combatant.agility, self.agility)
+        combatant.constitution = plus_equal_with_min(combatant.constitution, self.constitution)
+        combatant.intelligence = plus_equal_with_min(combatant.intelligence, self.intelligence)
+        combatant.wits = plus_equal_with_min(combatant.wits, self.wits)
+        combatant.willpower = plus_equal_with_min(combatant.willpower, self.willpower)
 
     @classmethod
     def int_list(cls, int_list: list):
@@ -50,7 +50,7 @@ class Species:
 
     @classmethod
     def from_json(cls, json_dict):
-        mods = AttributeMods.int_list(['mods'])
+        mods = AttributeMods.int_list(json_dict['mods'])
         return Species(json_dict['species'], json_dict['scientific'], json_dict['adjective'], json_dict['plural'],
                        json_dict['epithet'], json_dict['epithet_plural'], mods)
 
@@ -85,25 +85,32 @@ class Profession:
 
 
 class Character:
-    def __init__(self, name: str, gender: Gender, species: Species):
-        self.name = name
+    def __init__(self, last_name: str, first_name: str, gender: Gender, species: Species):
+        self.last_name = last_name
+        self.first_name = first_name
         self.gender = gender
         self.species = species
 
     def __repr__(self):
-        return f'<<{self.__class__.__name__}>> <{id(self)}> Name: {self.name} Species: {self.species}'
+        return f'<<{self.__class__.__name__}>> <{id(self)}> Name: {self.last_name} Species: {self.species}'
 
 
 class NonPlayer(Character):
-    def __init__(self, name: str, gender: Gender, species: Species, option_list: main.OptionList, description: str):
-        super().__init__(name, gender, species)
+    def __init__(self, last_name: str, first_name: str, gender: Gender, species: Species,
+                 option_list: helpers.OptionList, description: str):
+        super().__init__(last_name, first_name, gender, species)
         self.option_list = option_list
         self.description = description
 
+    @classmethod
+    def build_with_random_name(cls, species: Species, gender: Gender, option_list, description):
+        first, last = generate_random_name(species, gender)
+        return NonPlayer(last, first, gender, species, option_list, description)
+
 
 class Combatant(Character):
-    def __init__(self, name, gender, species, profession: Profession, level: int = 1):
-        super().__init__(name, gender, species)
+    def __init__(self, last_name, first_name: str, gender, species, profession: Profession, level: int = 1):
+        super().__init__(last_name, first_name, gender, species)
         self.profession = profession
         self.strength = 10
         self.agility = 10
@@ -128,12 +135,21 @@ class Combatant(Character):
 
 
 class Hero(Combatant):
-    def __init__(self, name, gender, species, profession, level, location: Locations.Location = Locations.start):
-        super().__init__(name, gender, species, profession, level)
+    def __init__(self, last_name, first_name, gender, species, profession, level,
+                 location: Locations.Location):
+        super().__init__(last_name, first_name, gender, species, profession, level)
         self.location = location
 
 
 class Monster(Combatant):
-    def __init__(self, name, gender, species, profession, level):
-        super().__init__(name, gender, species, profession, level)
+    def __init__(self, last_name, first_name, gender, species, profession, level):
+        super().__init__(last_name, first_name, gender, species, profession, level)
         AttributeMods.mob_mods().apply(self)
+
+
+def generate_random_name(species, gender):
+    first_key = "_".join([species, gender, 'first'])
+    last_key = "_".join([species, gender, 'last'])
+    first_name = helpers.rand_from_json('names.json', first_key)
+    last_name = helpers.rand_from_json('names.json', last_key)
+    return first_name, last_name
