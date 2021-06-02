@@ -1,6 +1,7 @@
 import Locations
 import Characters
-import sqlite3
+
+from json import load
 
 
 game_options = {}

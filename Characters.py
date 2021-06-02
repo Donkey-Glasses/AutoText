@@ -151,8 +151,7 @@ class Monster(Combatant):
 
 
 def generate_random_name(species, gender):
-    first_key = "_".join([species, gender, 'first'])
-    last_key = "_".join([species, gender, 'last'])
-    first_name = helpers.random_from_data('names.json', first_key)
-    last_name = helpers.random_from_data('names.json', last_key)
-    return first_name, last_name
+    first = helpers.random_from_data("first_names", field="name",
+                                     where_clause=f'gender="{gender}" AND species="{species}"')
+    last = helpers.random_from_data("last_names", field="name", where_clause=f'species={species}')
+    return first, last

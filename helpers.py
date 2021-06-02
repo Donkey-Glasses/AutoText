@@ -19,10 +19,13 @@ def connection_cleanup(connection):
     connection.close()
 
 
-def random_from_data(table: str):
+def random_from_data(table: str, field: str, where_clause: str = None):
     con, cur = connection_setup()
-    cur.execute(f'SELECT * FROM {table}')
-    return choice(cur.fetchall())
+    if where_clause is not None:
+        cur.execute(f'SELECT {field} FROM {table} WHERE {where_clause}')
+    else:
+        cur.execute(f'SELECT {field} FROM {table}')
+    return choice(cur.fetchall())[0]
 
 
 def load_from_data_file(table: str, where_clause: str = None):
