@@ -2,12 +2,6 @@ import sqlite3
 import json
 
 
-def read_characters():
-    with open("characters.data") as chars:
-        data = json.load(chars)
-    return data["Gender"]
-
-
 def setup():
     connection = sqlite3.connect('game_data.dat')
     cursor = connection.cursor()

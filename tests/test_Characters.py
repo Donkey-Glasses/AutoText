@@ -1,6 +1,4 @@
-import os
 import unittest
-from helpers import load_from_data_file
 from Characters import *
 
 
