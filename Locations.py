@@ -11,13 +11,14 @@ class Location:
         self.option_list = option_list
         self.npc_list = npc_list
 
-    def on_enter(self, player):
+    def on_enter(self):
         print(self.location_name.center(40, '*'))
         print(self.description)
         print('-' * 40)
-        for npc in self.npc_list:
-            print(f'  {npc.last_name}')
-            print(f'  {npc.description}')
+        if len(self.npc_list) > 0:
+            for npc in self.npc_list:
+                print(f'  {npc.last_name}')
+                print(f'  {npc.description}')
 
 
 class Dungeon(Location):
@@ -36,6 +37,10 @@ class RestStop(Location):
     def __init__(self, location_name, description, option_list, npc_list):
         super().__init__(location_name, description, option_list, npc_list)
         raise NotImplementedError
+
+
+START_OPTIONS = OptionList()
+START_MENU = Location("WELCOME TO AUTOTEXT", "Welcome to AutoText!", START_OPTIONS, [])
 
 
 if __name__ == "__main__":

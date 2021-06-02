@@ -1,10 +1,11 @@
 from random import choice
+from typing import List
 
 import sqlite3
 
 
 class OptionList:
-    def __init__(self):
+    def __init__(self, options: List[dict]):
         raise NotImplementedError
 
 
