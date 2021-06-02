@@ -6,10 +6,8 @@ from Characters import *
 
 class TestMonster(unittest.TestCase):
     def setUp(self):
-        print(os.getcwd())
-        data = load_from_data_file('..\\data\\characters.data')
-        male = Gender.from_json(data['Gender']['male'])
-        goblin = Species.from_json(data['Species']['goblin'])
+        goblin = Species.from_data(name_string='goblin')
+        male = Gender.from_data(name_string='male')
         self.goblin = Monster('Smith', 'Gobo', male, goblin, Profession.mob_warrior(), 2)
 
     def test_monster_general(self):

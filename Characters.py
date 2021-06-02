@@ -1,6 +1,8 @@
 import Locations
 import helpers
 
+from typing import Union
+
 
 class AttributeMods:
     def __init__(self, strength: int, agility: int, constitution: int, intelligence: int, wits: int, willpower: int):
@@ -23,7 +25,7 @@ class AttributeMods:
         combatant.willpower = plus_equal_with_min(combatant.willpower, self.willpower)
 
     @classmethod
-    def int_list(cls, int_list: list):
+    def int_list(cls, int_list: Union[tuple, list]):
         stre = int_list[0]
         agil = int_list[1]
         cons = int_list[2]
@@ -49,10 +51,11 @@ class Species:
         self.mods = mods
 
     @classmethod
-    def from_json(cls, json_dict):
-        mods = AttributeMods.int_list(json_dict['mods'])
-        return Species(json_dict['species'], json_dict['scientific'], json_dict['adjective'], json_dict['plural'],
-                       json_dict['epithet'], json_dict['epithet_plural'], mods)
+    def from_data(cls, name_string: str):
+        data = helpers.load_from_data_file("species", f'species="{name_string}"')
+        mod_list = data[6:]
+        mods = AttributeMods.int_list(mod_list)
+        return Species(data[0], data[1], data[2], data[3], data[4], data[5], mods)
 
 
 class Gender:
@@ -64,9 +67,9 @@ class Gender:
         self.objective = objective
 
     @classmethod
-    def from_json(cls, json_dict):
-        return Gender(json_dict['scientific'], json_dict['adult'], json_dict['diminutive'],
-                      json_dict['subjective'], json_dict['objective'])
+    def from_data(cls, name_string: str):
+        data = helpers.load_from_data_file("genders", f'gender="{name_string}"')
+        return Gender(data[0], data[1], data[2], data[3], data[4])
 
 
 class Profession:
@@ -150,6 +153,6 @@ class Monster(Combatant):
 def generate_random_name(species, gender):
     first_key = "_".join([species, gender, 'first'])
     last_key = "_".join([species, gender, 'last'])
-    first_name = helpers.rand_from_json('names.json', first_key)
-    last_name = helpers.rand_from_json('names.json', last_key)
+    first_name = helpers.random_from_data('names.json', first_key)
+    last_name = helpers.random_from_data('names.json', last_key)
     return first_name, last_name
