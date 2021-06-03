@@ -2,6 +2,7 @@ from random import choice, randint
 from typing import List
 from functools import partial
 
+import os
 import sqlite3
 
 
@@ -39,9 +40,24 @@ class OptionList:
         leave = Option('Leave', 'l', print, 'you walk out the door')  # TODO
         return OptionList([rest, leave])
 
+    @classmethod
+    def market(cls):
+        buy = Option('Buy', 'b', print, 'What \'re ya buyin?')  # TODO
+        sell = Option('Sell', 's', print, 'What are ya sellin?')  # TODO
+        return OptionList([buy, sell])
+
+    @classmethod
+    def dungeon(cls):
+        search = Option('Search', 's', print, 'You find no traps')  # TODO
+        leave = Option('Leave', 'l', print, 'You run away!')  # TODO
+        return OptionList([search, leave])
+
 
 def connection_setup():
-    connection = sqlite3.connect('data\\game_data.dat')
+    user = os.getenv('HOMEPATH')
+    dat = "\\PycharmProjects\\AutoText\\data\\game_data.dat"
+    database = "c:\\" + user + dat
+    connection = sqlite3.connect(database)
     cursor = connection.cursor()
     return connection, cursor
 
@@ -93,13 +109,27 @@ def load_from_data_file(table: str, where_clause: str = None):
     return data[0]
 
 
-def select_field_from_table(field: str, table: str, where_string: str="") -> list:
+def select_field_from_table(field: str, table: str, where_string: str = "") -> list:
     con, cur = connection_setup()
-    cur.execute(f'SELECT {field} FROM {table} {where_string}')
+    try:
+        query = f'SELECT {field} FROM {table} {where_string}'
+        cur.execute(query)
+    except sqlite3.OperationalError as oe:
+        print(oe)
     data = cur.fetchall()
     connection_cleanup(con)
     for index, item in enumerate(data):
         data[index] = str(item[0])
+    return data
+
+
+def field_list_from_table(field_list: list, table: str, where_string: str = "") -> list:
+    con, cur = connection_setup()
+    data = []
+    for item in field_list:
+        cur.execute(f'SELECT {item} FROM {table} {where_string}')
+        data.append(cur.fetchall()[0][0])
+    connection_cleanup(con)
     return data
 
 
