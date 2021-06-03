@@ -1,16 +1,47 @@
-from random import choice
+from random import choice, randint
 from typing import List
+from functools import partial
 
 import sqlite3
 
 
+class Option:
+    def __init__(self, text: str, selector: str, command, *args, **kwargs):
+        self.text = text
+        self.selector = selector
+        self.command = partial(command, *args, **kwargs)
+
+    def select(self):
+        selection = self.command()
+        return selection
+
+
 class OptionList:
-    def __init__(self, options: List[dict]):
-        raise NotImplementedError
+    def __init__(self, options: List[Option]):
+        self.options = options
+
+    def list_options(self):
+        for option in self.options:
+            print(f'{option.text}')
+
+    def choose_option(self):
+        print('You can do the following...')
+        self.list_options()
+        while True:
+            selection = input(f'What do you want to do?  >> ')
+            for item in self.options:
+                if selection.lower().startswith(item.selector):
+                    return item.select()
+
+    @classmethod
+    def rest_stop(cls):
+        rest = Option('Rest', 'r', print, 'you have rested')  # TODO
+        leave = Option('Leave', 'l', print, 'you walk out the door')  # TODO
+        return OptionList([rest, leave])
 
 
 def connection_setup():
-    connection = sqlite3.connect('..\\data\\game_data.dat')
+    connection = sqlite3.connect('data\\game_data.dat')
     cursor = connection.cursor()
     return connection, cursor
 
@@ -20,17 +51,37 @@ def connection_cleanup(connection):
     connection.close()
 
 
-def random_from_data(table: str, field: str, where_clause: str = None):
+def random_from_data(table: str, field: str, where_clause: str = None, first_only: bool = True):
     con, cur = connection_setup()
     if where_clause is not None:
         cur.execute(f'SELECT {field} FROM {table} WHERE {where_clause}')
     else:
         cur.execute(f'SELECT {field} FROM {table}')
-    return choice(cur.fetchall())[0]
+    response = cur.fetchall()
+    connection_cleanup(con)
+    if first_only:
+        return choice(response)[0]
+    else:
+        return choice(response)
+
+
+def random_from_data_weighted(table: str, field: str, where_clause: str = None):
+    con, cur = connection_setup()
+    if where_clause is not None:
+        cur.execute(f'SELECT {field}, weight FROM {table} WHERE {where_clause}')
+    else:
+        cur.execute(f'SELECT {field}, weight FROM {table}')
+    response = cur.fetchall()
+    num_max = sum([item[-1] for item in response])
+    num = randint(1, num_max)
+    accumulate = 0
+    for item in response:
+        accumulate += item[-1]
+        if accumulate >= num:
+            return item[:-1]
 
 
 def load_from_data_file(table: str, where_clause: str = None):
-
     con, cur = connection_setup()
     if where_clause is not None:
         query = f'SELECT * FROM {table} WHERE {where_clause}'
@@ -40,3 +91,17 @@ def load_from_data_file(table: str, where_clause: str = None):
     data = cur.fetchall()
     connection_cleanup(con)
     return data[0]
+
+
+def select_field_from_table(field: str, table: str, where_string: str="") -> list:
+    con, cur = connection_setup()
+    cur.execute(f'SELECT {field} FROM {table} {where_string}')
+    data = cur.fetchall()
+    connection_cleanup(con)
+    for index, item in enumerate(data):
+        data[index] = str(item[0])
+    return data
+
+
+if __name__ == "__main__":
+    pass

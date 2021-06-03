@@ -20,16 +20,41 @@ def cleanup(connection):
 
 if __name__ == "__main__":
     con, cur = setup()
-    # cur.execute("DROP TABLE first_names")
+    # cur.execute("SELECT species FROM species")
     # con.commit()
-    # cur.execute("DROP TABLE last_names")
+    # x = cur.fetchall()
+    # for y in x:
+    #     print(y)
+    # print(type(x))
+    # cur.execute("DROP TABLE professions")
     # con.commit()
-    # cur.execute("""CREATE TABLE first_names (
+    # cur.execute("""ALTER TABLE professions
+    #                RENAME COLUMN professions TO profession""")
+    # cur.execute("")
+    # con.commit()
+    # cur.execute("""CREATE TABLE professions (
     #             name text,
-    #             species text,
-    #             gender text
+    #             plural text,
+    #             strength int,
+    #             agility int,
+    #             constitution int,
+    #             intelligence int,
+    #             wits int,
+    #             willpower int
     #             )""")
     # con.commit()
+    # cur.execute("INSERT INTO professions VALUES (?, ?, ?, ?, ?, ?, ?, ?)", ('warrior', 'warriors', 4, 2, 4, 0, 2, 2))
+    # cur.execute("INSERT INTO professions VALUES (?, ?, ?, ?, ?, ?, ?, ?)", ('rogue', 'rogues', 2, 4, 0, 2, 4, 2))
+    # cur.execute("INSERT INTO professions VALUES (?, ?, ?, ?, ?, ?, ?, ?)", ('mage', 'mages', 0, 2, 2, 4, 2, 4))
+    # cur.execute("INSERT INTO professions VALUES (?, ?, ?, ?, ?, ?, ?, ?)", ('priest', 'priests', 2, 2, 2, 4, 0, 4))
+    # cur.execute("INSERT INTO professions VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    #             ('skirmisher', 'skirmisher', 0, 2, 0, -2, 2, -2))
+    # con.commit()
+    cur.execute("SELECT gender, weight FROM genders")
+    x = cur.fetchall()
+    print(x)
+    for y in x:
+        print(y)
     # cur.execute("""CREATE TABLE last_names (
     #             name text,
     #             species text)""")

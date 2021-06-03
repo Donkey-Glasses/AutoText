@@ -1,4 +1,3 @@
-import Locations
 import helpers
 
 from typing import Union
@@ -57,6 +56,19 @@ class Species:
         mods = AttributeMods.int_list(mod_list)
         return Species(data[0], data[1], data[2], data[3], data[4], data[5], mods)
 
+    @classmethod
+    def new_game_species(cls):
+        species_list = helpers.select_field_from_table('species', 'species')
+        option_list = []
+        for species in species_list:
+            text = species.capitalize()
+            selector = species[:1]
+            arg = species.lower()
+            option_list.append(helpers.Option(text, selector, Species.from_data, arg))
+        species_options = helpers.OptionList(option_list)
+        new_species = species_options.choose_option()
+        return new_species
+
 
 class Gender:
     def __init__(self, scientific: str, adult: str, diminutive: str, subjective: str, objective: str):
@@ -70,6 +82,19 @@ class Gender:
     def from_data(cls, name_string: str):
         data = helpers.load_from_data_file("genders", f'gender="{name_string}"')
         return Gender(data[0], data[1], data[2], data[3], data[4])
+
+    @classmethod
+    def new_game_gender(cls):
+        gender_list = helpers.select_field_from_table('gender', 'genders', 'WHERE gender!="object"')
+        option_list = []
+        for gender in gender_list:
+            text = gender.capitalize()
+            selector = gender[:1]
+            arg = gender.lower()
+            option_list.append(helpers.Option(text, selector, Gender.from_data, arg))
+        gender_options = helpers.OptionList(option_list)
+        new_gender = gender_options.choose_option()
+        return new_gender
 
 
 class Profession:
@@ -85,6 +110,26 @@ class Profession:
     @classmethod
     def mob_warrior(cls):
         return Profession('warrior', 'warriors', AttributeMods.int_list([0, 0, 0, -4, -2, -2]))
+
+    @classmethod
+    def from_data(cls, name_string: str):
+        data = helpers.load_from_data_file("professions", f'profession="{name_string}"')
+        mod_list = data[2:]
+        mods = AttributeMods.int_list(mod_list)
+        return Profession(data[0], data[1], mods)
+
+    @classmethod
+    def new_game_profession(cls):
+        profession_list = helpers.select_field_from_table('profession', 'professions', "WHERE mob_only='False'")
+        option_list = []
+        for prof in profession_list:
+            text = prof.capitalize()
+            selector = prof[:1]
+            arg = prof.lower()
+            option_list.append(helpers.Option(text, selector, Profession.from_data, arg))
+        profession_list = helpers.OptionList(option_list)
+        new_profession = profession_list.choose_option()
+        return new_profession
 
 
 class Character:
@@ -138,10 +183,18 @@ class Combatant(Character):
 
 
 class Hero(Combatant):
-    def __init__(self, last_name, first_name, gender, species, profession, level,
-                 location: Locations.Location):
+    def __init__(self, last_name, first_name, gender, species, profession, level):
         super().__init__(last_name, first_name, gender, species, profession, level)
-        self.location = location
+
+    @classmethod
+    def new_character(cls):
+        level = 1
+        species = Species.new_game_species()
+        gender = Gender.new_game_gender()
+        profession = Profession.new_game_profession()
+        first_name = input("What is your character's first name?  >> ")
+        last_name = input("What is your character's last name?  >> ")
+        return Hero(last_name, first_name, gender, species, profession, level)
 
 
 class Monster(Combatant):
@@ -155,3 +208,7 @@ def generate_random_name(species, gender):
                                      where_clause=f'gender="{gender}" AND species="{species}"')
     last = helpers.random_from_data("last_names", field="name", where_clause=f'species={species}')
     return first, last
+
+
+if __name__ == "__main__":
+    pass
