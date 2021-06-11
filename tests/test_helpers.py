@@ -1,12 +1,17 @@
 from unittest import TestCase
 
 import helpers
-from helpers import load_from_data_file
+from Locations import Town
 
 
 class Test(TestCase):
+    def setUp(self) -> None:
+        self.save_id = ""
+        self.loaded_town = None
+        self.town = Town.new_random_town(level_range=10)
+
     def test_load_from_data_file(self):
-        human = load_from_data_file("species", "species='human'")
+        human = helpers.load_from_data_file("species", "species='human'")
         data_dict = {"species": "human", "scientific": "homonus", "adjective": "human", "plural": "humans",
                      "epithet": "jack", "epithet_plural": "jacks"}
         for index, item in enumerate(data_dict.values()):
@@ -19,3 +24,11 @@ class Test(TestCase):
             random_last_name = helpers.random_from_data("last_names", field="name",
                                                         where_clause="species='goblin'")
             print(random_first_name + " " + random_last_name)
+
+    def test_save_blob(self):
+        self.save_id = helpers.save_blob('TESTTown', self.town)
+        print(f'SAVE ID: {self.save_id}')
+
+    def test_load_blob(self):
+        self.loaded_town = helpers.load_blob("Test Save File")
+        print(self.loaded_town)

@@ -1,9 +1,11 @@
 from random import choice, randint
 from typing import List
 from functools import partial
+from datetime import datetime
 
 import os
 import sqlite3
+import pickle
 
 
 class Option:
@@ -131,6 +133,26 @@ def field_list_from_table(field_list: list, table: str, where_string: str = "") 
         data.append(cur.fetchall()[0][0])
     connection_cleanup(con)
     return data
+
+
+def save_blob(class_name: str, class_object):
+    now = str(datetime.utcnow())
+    save_id = "-".join([class_name, now])
+    con, cur = connection_setup()
+    class_binary = pickle.dumps(class_object)
+    cur.execute("INSERT INTO save_objects VALUES (?, ?, ?)", (save_id, class_name, class_binary))
+    con.commit()
+    print('Saved!')
+    return save_id
+
+
+def load_blob(save_id: str):
+    con, cur = connection_setup()
+    cur.execute(f"SELECT blob FROM save_objects WHERE save_id='{save_id}'")
+    con.commit()
+    blob_objects = cur.fetchall()
+    binary_list = [pickle.loads(item[0]) for item in blob_objects]
+    return binary_list
 
 
 if __name__ == "__main__":
