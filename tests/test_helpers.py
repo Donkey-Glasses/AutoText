@@ -28,7 +28,9 @@ class Test(TestCase):
     def test_save_blob(self):
         self.save_id = helpers.save_blob('TESTTown', self.town)
         print(f'SAVE ID: {self.save_id}')
+        self.assertEqual(str, type(self.save_id))
 
     def test_load_blob(self):
         self.loaded_town = helpers.load_blob("Test Save File")
         print(self.loaded_town)
+        self.assertEqual(Town, type(self.loaded_town[0]))
